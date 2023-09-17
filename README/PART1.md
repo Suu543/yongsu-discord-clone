@@ -168,7 +168,7 @@ function MyComponent(props) {
 // app/page.tsx
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-
+1;
 const state = true;
 
 export default function Home() {
