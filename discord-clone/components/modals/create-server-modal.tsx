@@ -24,8 +24,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
 import { FileUpload } from "@/components/file-upload";
+import { useModal } from "@/hooks/use-modal-store";
 
 const formSchema = z.object({
   name: z.string().min(1, {
@@ -36,14 +36,14 @@ const formSchema = z.object({
   }),
 });
 
-export const InitialModal = () => {
-  // Hydration 오류 방지
-  const [isMounted, setIsMounted] = useState(false);
+// 별도로 컴포넌트를 호출하는 방식 대신에
+// zustand로 상태 값을 공유해서 다른곳에서 값을 변경하는 경우 호출되는 형태로 동작
+
+export const CreateServerModal = () => {
+  const { isOpen, onClose, type } = useModal();
   const router = useRouter();
 
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+  const isModalOpen = isOpen && type === "createServer";
 
   // isSubmitting은 내장형
   const form = useForm({
@@ -60,22 +60,21 @@ export const InitialModal = () => {
     try {
       await axios.post("/api/servers", values);
 
-      // form 리셋 기능
-      // 이 부분 질문
       form.reset();
       router.refresh();
-      window.location.reload();
+      onClose();
     } catch (error) {
       console.log("Error: ", error);
     }
   };
 
-  if (!isMounted) {
-    return null;
-  }
+  const handleClose = () => {
+    form.reset();
+    onClose();
+  };
 
   return (
-    <Dialog open>
+    <Dialog open={isModalOpen} onOpenChange={handleClose}>
       <DialogContent className="p-0 overflow-hidden text-black bg-white">
         <DialogHeader className="px-6 pt-8">
           <DialogTitle className="text-2xl font-bold text-center">
